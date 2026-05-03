@@ -1,24 +1,19 @@
 # [Library Name]
 
-## Purpose
+## Purpose & Prerequisites
 
-<!-- What does this library do and why does it matter? -->
+<!-- Document the library's core purpose and what's needed to use it. -->
 
-## Basic Use Cases
+## Installation & Basic Functionality
 
-<!-- Describe common applications of the library. Build simple example scripts and place them in a scripts/ or examples/ subdirectory to demonstrate these use cases. -->
+<!-- Verify installation and demonstrate basic functionality through scripts, playbooks, or demos in a scripts/ or examples/ subdirectory. -->
 
-## Documentation Gap
+## Relevant Use Case
 
-<!-- Identify an undocumented or underexplored scenario for this library (e.g., multi-node scaling, running on a DGX Spark, deployment within a MIG partition). -->
-
-## Advanced Use Case
-
-<!-- Document your specialized implementation. Explain the setup, any challenges encountered, and your findings. Include scripts in the scripts/ or examples/ subdirectory where applicable. -->
+<!-- Identify a workflow within an industry (vertical) or segment (horizontal) where this library is highly relevant. Explain how it integrates into the end-to-end workflow. -->
 
 ## Helpful Links
 
-<!-- Link to official resources for the library. For example: -->
 - [Official Documentation]()
 - [GitHub Repository]()
 - [NVIDIA Developer Page]()
