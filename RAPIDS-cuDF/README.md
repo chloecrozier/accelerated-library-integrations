@@ -2,8 +2,8 @@
 
 [cuDF](https://github.com/rapidsai/cudf) is the GPU DataFrame library in the RAPIDS SDK. It exposes a pandas-style API backed by Apache Arrow's columnar memory format and executes operations on NVIDIA GPUs.
 
-- **vs pandas:** pandas-compatible API. With `cudf.pandas`, existing pandas code runs on the GPU with no source changes; unsupported operations fall back to CPU.
-- **vs Dask-cuDF:** cuDF is single-GPU and eager. Dask-cuDF wraps cuDF to partition workloads across multiple GPUs or nodes.
+- **vs pandas:** pandas-compatible API. With `cudf.pandas`, existing pandas code runs on the GPU with no source changes where unsupported operations fall back to CPU.
+- **vs Dask-cuDF:** cuDF is used for single-GPU processing. Dask-cuDF wraps cuDF to partition workloads across multiple GPUs or nodes.
 
 ## Purpose & Prerequisites
 
@@ -39,9 +39,10 @@ conda create -n rapids -c rapidsai -c conda-forge -c nvidia \
 
 The [`examples/`](./examples) folder is intended to be run in order:
 
-1. [`SETUP.md`](./examples/SETUP.md) — conda env and instructions for running the remaining files.
+1. [`SETUP.md`](./examples/SETUP.md) — conda env, install steps, and instructions for running the remaining files (with screenshots from a real DGX Spark / GB10).
 2. [`install_verification.py`](./examples/install_verification.py) — end-to-end smoke test covering driver, CUDA runtime, and GPU compute. Run first to confirm a healthy install.
 3. [`basic_uses.ipynb`](./examples/basic_uses.ipynb) — DataFrame operations, joins, pandas interop, `cudf.pandas`, and Dask-cuDF.
+4. [`relevant_uses.py`](./examples/relevant_uses.py) — pandas vs cuDF vs Dask-cuDF benchmark on real public NYC TLC data (see "Relevant Use Case" below).
 
 ## Relevant Use Case
 
@@ -53,7 +54,16 @@ The [`examples/`](./examples) folder is intended to be run in order:
 - Presto on GPU: TPC-H SF1000 in 99.9s on a GH200 Grace Hopper Superchip vs. 1,246s on an AMD 5965X CPU.
 - Spark in hybrid mode: compute-heavy stages such as TPC-DS Q95 (SF100) execute on GPU while remaining stages run on CPU.
 
-The integration requires no changes to existing Presto or Spark queries; cuDF executes beneath the query engine via Velox. [`examples/relevant_uses.py`](./examples/relevant_uses.py) demonstrates the same pattern at small scale by downloading public NYC TLC taxi data and timing an identical read → filter → groupby → top-N pipeline across pandas, cuDF, and Dask-cuDF.
+The integration requires no changes to existing Presto or Spark queries since cuDF executes beneath the query engine via Velox.
+
+[`examples/relevant_uses.py`](./examples/relevant_uses.py) demonstrates the same pattern at small scale on a single GPU. It downloads public NYC TLC taxi data and times the same four-step pipeline across **pandas**, **cuDF**, and **Dask-cuDF**:
+
+1. **read** — load the file from disk.
+2. **filter** — keep only rides where the fare is over $10.
+3. **groupby** — aggregate trip distance, fare, and tip stats by passenger count.
+4. **top100** — pull the 100 highest-revenue rides via `nlargest`.
+
+Pass `--scale N` to replicate the loaded data N times to increase task size. Performance of cuDF's grows with scale (default `--scale 10` ≈ 30M rows and `--scale 20` ≈ 60M rows), so the benchmark options can capture this nature.
 
 ### Notes
 
@@ -69,4 +79,4 @@ The integration requires no changes to existing Presto or Spark queries; cuDF ex
 
 ## Contributor
 
-Chloe Crozier
+[Chloe Crozier](https://github.com/chloecrozier)
