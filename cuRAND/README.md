@@ -2,11 +2,15 @@
 
 ## Purpose & Prerequisites
 
-cuRAND is a CUDA library for high-quality pseudorandom and quasirandom numbers. cuRAND is a simple bit-mixing algorithm. 
+cuRAND is a CUDA library for high-quality pseudorandom and quasirandom numbers. 
+
+cuRAND is a simple bit-mixing algorithm. 
+
 Prerequisites: Any NVIDIA GPU, nvcc and CUDA 3.2 or higher. 
 
 ## Installation & Basic Functionality
 Linux: install the CUDA toolkit, including NVCC ( NVIDIA CUDA Compiler )
+
 Brev: buy brev credits, pick a cloud GPU, run the VM from CLI.
 <!-- Verify installation and demonstrate basic functionality through scripts, playbooks, or demos in a scripts/ or examples/ subdirectory. -->
 
