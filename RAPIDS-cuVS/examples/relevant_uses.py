@@ -6,39 +6,73 @@ nearest-neighbor search. See ../README.md for context.
 """
 
 import argparse
+import gc
 import io
 import math
 import os
+import logging
+import warnings
 import sys
 import tempfile
 import time
 import urllib.request
 import zipfile
 
-GUACAMOL_URL = "https://figshare.com/ndownloader/articles/7322252/versions/2"
+GUACAMOL_URL = "https://ndownloader.figshare.com/files/13612745"
 MIN_EXPECTED_MOLECULES = 1_000_000
+
+logging.basicConfig(level=logging.ERROR)
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--limit", type=int, default=50000,
-                        help="maximum corpus rows to embed; use 0 for full corpus (default: 50000)")
-    parser.add_argument("--queries", type=int, default=128,
-                        help="number of indexed molecules to use as queries (default: 128)")
-    parser.add_argument("--batch-size", type=int, default=64,
-                        help="embedding batch size (default: 64)")
-    parser.add_argument("--k", type=int, default=10,
-                        help="nearest neighbors per query (default: 10)")
-    parser.add_argument("--embedding-model", default="mist-models/mist-28M-ti624ev1",
-                        help="Hugging Face model used to generate molecule embeddings")
-    parser.add_argument("--max-length", type=int, default=512,
-                        help="tokenizer max sequence length (default: 512)")
-    parser.add_argument("--n-lists", type=int, default=None,
-                        help="IVF-Flat inverted lists; defaults to sqrt(n), capped at 1024")
-    parser.add_argument("--n-probes", type=int, default=20,
-                        help="IVF-Flat lists to probe per query (default: 20)")
-    parser.add_argument("--seed", type=int, default=7,
-                        help="random seed for selecting query molecules (default: 7)")
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=1_000_000,
+        help="maximum corpus rows to embed; use 0 for full corpus (default: 1_000_000)",
+    )
+    parser.add_argument(
+        "--queries",
+        type=int,
+        default=128,
+        help="number of indexed molecules to use as queries (default: 128)",
+    )
+    parser.add_argument(
+        "--batch-size", type=int, default=64, help="embedding batch size (default: 64)"
+    )
+    parser.add_argument(
+        "--k", type=int, default=10, help="nearest neighbors per query (default: 10)"
+    )
+    parser.add_argument(
+        "--embedding-model",
+        default="mist-models/mist-28M-ti624ev1",
+        help="Hugging Face model used to generate molecule embeddings",
+    )
+    parser.add_argument(
+        "--max-length",
+        type=int,
+        default=512,
+        help="tokenizer max sequence length (default: 512)",
+    )
+    parser.add_argument(
+        "--n-lists",
+        type=int,
+        default=None,
+        help="IVF-Flat inverted lists; defaults to sqrt(n), capped at 1024",
+    )
+    parser.add_argument(
+        "--n-probes",
+        type=int,
+        default=20,
+        help="IVF-Flat lists to probe per query (default: 20)",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=7,
+        help="random seed for selecting query molecules (default: 7)",
+    )
     return parser.parse_args()
 
 
@@ -79,9 +113,25 @@ def load_dependencies():
 def download_guacamol_dataset():
     tmp = tempfile.NamedTemporaryFile(suffix=".download", delete=False)
     tmp.close()
+
+    def reporthook(block_count, block_size, total_size):
+        downloaded = block_count * block_size
+        downloaded_mb = downloaded / 1e6
+        if total_size > 0:
+            total_mb = total_size / 1e6
+            percent = min(100.0, (downloaded / total_size) * 100.0)
+            print(
+                f"  downloaded {downloaded_mb:,.2f}/{total_mb:,.2f} MB ({percent:5.1f}%)",
+                end="\r",
+                flush=True,
+            )
+        else:
+            print(f"  downloaded {downloaded_mb:,.2f} MB", end="\r", flush=True)
+
     try:
         print(f"Downloading GuacaMol all-SMILES corpus from {GUACAMOL_URL} ...")
-        urllib.request.urlretrieve(GUACAMOL_URL, tmp.name)
+        urllib.request.urlretrieve(GUACAMOL_URL, tmp.name, reporthook)
+        print()
         size_mb = os.path.getsize(tmp.name) / 1e6
         print(f"  {size_mb:.2f} MB on disk")
         return tmp.name
@@ -95,13 +145,17 @@ def iter_smiles_lines(path):
     if zipfile.is_zipfile(path):
         with zipfile.ZipFile(path) as zf:
             candidates = [
-                name for name in zf.namelist()
-                if not name.endswith("/") and name.lower().endswith((".smi", ".smiles", ".txt", ".csv"))
+                name
+                for name in zf.namelist()
+                if not name.endswith("/")
+                and name.lower().endswith((".smi", ".smiles", ".txt", ".csv"))
             ]
             if not candidates:
                 candidates = [name for name in zf.namelist() if not name.endswith("/")]
             if not candidates:
-                sys.exit("FAIL: GuacaMol download did not contain a readable molecule file")
+                sys.exit(
+                    "FAIL: GuacaMol download did not contain a readable molecule file"
+                )
             with zf.open(candidates[0]) as fh:
                 for line in io.TextIOWrapper(fh, encoding="utf-8"):
                     yield line
@@ -138,10 +192,12 @@ def prepare_molecules(path, limit, deps):
         if max_records is not None and total_rows > max_records:
             continue
 
-        records.append({
-            "source_row": total_rows - 1,
-            "smiles": smiles,
-        })
+        records.append(
+            {
+                "source_row": total_rows - 1,
+                "smiles": smiles,
+            }
+        )
 
     if total_rows < MIN_EXPECTED_MOLECULES:
         sys.exit(
@@ -160,8 +216,6 @@ def embed_smiles(smiles, model_name, batch_size, max_length, deps):
     torch = deps["torch"]
     AutoModel = deps["AutoModel"]
     AutoTokenizer = deps["AutoTokenizer"]
-
-    print(f"Loading embedding model: {model_name}")
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     model = AutoModel.from_pretrained(model_name, trust_remote_code=True)
 
@@ -175,7 +229,7 @@ def embed_smiles(smiles, model_name, batch_size, max_length, deps):
     t0 = time.perf_counter()
     with torch.no_grad():
         for start in range(0, total, batch_size):
-            batch = smiles[start:start + batch_size]
+            batch = smiles[start : start + batch_size]
             inputs = tokenizer(
                 batch,
                 padding=True,
@@ -185,7 +239,13 @@ def embed_smiles(smiles, model_name, batch_size, max_length, deps):
             )
             inputs = {k: v.to(device) for k, v in inputs.items()}
             outputs = model(**inputs)
-            emb = outputs.last_hidden_state[:, 0, :].detach().cpu().numpy().astype(np.float32)
+            emb = (
+                outputs.last_hidden_state[:, 0, :]
+                .detach()
+                .cpu()
+                .numpy()
+                .astype(np.float32)
+            )
             batches.append(emb)
             done = min(start + batch_size, total)
             print(f"  embedded {done:>6,}/{total:,} molecules", end="\r")
@@ -209,7 +269,7 @@ def cpu_cosine_search(dataset, queries, k, np):
     all_neighbors = []
 
     for start in range(0, q.shape[0], 32):
-        batch = q[start:start + 32]
+        batch = q[start : start + 32]
         sims = batch @ data.T
         candidate_idx = np.argpartition(-sims, kth=k - 1, axis=1)[:, :k]
         rows = np.arange(batch.shape[0])[:, None]
@@ -239,35 +299,6 @@ def speedup_ratio(baseline_ms, candidate_ms):
     return baseline_ms / max(candidate_ms, 1e-9)
 
 
-def print_neighbor_examples(records, query_ids, neighbors, distances, max_examples=3):
-    print("Example nearest-neighbor hits")
-    print("-" * 60)
-    shown = min(max_examples, len(query_ids))
-    for row_idx in range(shown):
-        query_id = int(query_ids[row_idx])
-        query = records.iloc[query_id]
-        print(
-            f"Query idx={query_id} source_row={query['source_row']} "
-            f"smiles={query['smiles']}"
-        )
-
-        printed = 0
-        for rank, neighbor_id in enumerate(neighbors[row_idx], start=1):
-            neighbor_id = int(neighbor_id)
-            if neighbor_id == query_id:
-                continue
-            hit = records.iloc[neighbor_id]
-            similarity = 1.0 - float(distances[row_idx, rank - 1])
-            print(
-                f"  {rank:>2}. idx={neighbor_id:<6} sim={similarity:>7.4f} "
-                f"source_row={hit['source_row']} smiles={hit['smiles']}"
-            )
-            printed += 1
-            if printed == 3:
-                break
-        print()
-
-
 def main():
     args = parse_args()
     require_nonnegative("limit", args.limit)
@@ -287,7 +318,9 @@ def main():
         sys.exit("FAIL: no CUDA devices detected")
 
     props = cp.cuda.runtime.getDeviceProperties(0)
-    gpu_name = props["name"].decode() if isinstance(props["name"], bytes) else props["name"]
+    gpu_name = (
+        props["name"].decode() if isinstance(props["name"], bytes) else props["name"]
+    )
 
     dataset_path = download_guacamol_dataset()
     try:
@@ -346,7 +379,9 @@ def main():
     exact_build_ms = (time.perf_counter() - t0) * 1000
 
     t0 = time.perf_counter()
-    exact_dist_gpu, exact_neighbors_gpu = brute_force.search(exact_index, queries_gpu, k)
+    exact_dist_gpu, exact_neighbors_gpu = brute_force.search(
+        exact_index, queries_gpu, k
+    )
     cp.cuda.runtime.deviceSynchronize()
     exact_search_ms = (time.perf_counter() - t0) * 1000
     exact_distances = cp.asarray(exact_dist_gpu).get()
@@ -365,7 +400,9 @@ def main():
     approx_build_ms = (time.perf_counter() - t0) * 1000
 
     t0 = time.perf_counter()
-    approx_dist_gpu, approx_neighbors_gpu = ivf_flat.search(search_params, approx_index, queries_gpu, k)
+    approx_dist_gpu, approx_neighbors_gpu = ivf_flat.search(
+        search_params, approx_index, queries_gpu, k
+    )
     cp.cuda.runtime.deviceSynchronize()
     approx_search_ms = (time.perf_counter() - t0) * 1000
     approx_distances = cp.asarray(approx_dist_gpu).get()
@@ -378,21 +415,27 @@ def main():
     print("-" * 40)
     print(f"  CPU cosine        {cpu_ms:>10.1f} ms")
     print(f"  cuVS build        {exact_build_ms:>10.1f} ms")
-    print(f"  cuVS search       {exact_search_ms:>10.1f} ms  ({speedup_ratio(cpu_ms, exact_search_ms):>5.1f}x vs CPU)")
+    print(
+        f"  cuVS search       {exact_search_ms:>10.1f} ms  ({speedup_ratio(cpu_ms, exact_search_ms):>5.1f}x vs CPU)"
+    )
     print(f"  CPU recall@{k:<2}      {cpu_recall:>10.3f} vs cuVS exact")
     print()
 
     print("[approximate search]")
     print("-" * 40)
     print(f"  IVF-Flat build    {approx_build_ms:>10.1f} ms")
-    print(f"  IVF-Flat search   {approx_search_ms:>10.1f} ms  ({speedup_ratio(cpu_ms, approx_search_ms):>5.1f}x vs CPU)")
+    print(
+        f"  IVF-Flat search   {approx_search_ms:>10.1f} ms  ({speedup_ratio(cpu_ms, approx_search_ms):>5.1f}x vs CPU)"
+    )
     print(f"  IVF recall@{k:<2}      {approx_recall:>10.3f} vs cuVS exact")
     print()
 
-    # Keep variables live until after output so explicit names are easier to inspect
-    # in a debugger or notebook conversion.
-    _ = cpu_distances, approx_distances
-    print_neighbor_examples(records, query_ids, exact_neighbors, exact_distances)
+    # Drop GPU-backed objects before interpreter shutdown so their destructors
+    # run while imported modules are still alive.
+    del approx_index, approx_dist_gpu, approx_neighbors_gpu
+    del exact_index, exact_dist_gpu, exact_neighbors_gpu
+    del dataset_gpu, queries_gpu
+    gc.collect()
 
 
 if __name__ == "__main__":
