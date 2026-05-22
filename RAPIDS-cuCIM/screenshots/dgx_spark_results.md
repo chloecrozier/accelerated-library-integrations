@@ -147,7 +147,7 @@ This is the canonical "first slide of digital pathology" workflow: color decompo
 
 ## Individual stage PNGs
 
-Every image at every stage is also saved as a standalone PNG (no titles, no axes — just the actual GPU-processed array, colormapped only for the binary masks and label images). Use these in the slide deck when you want a single isolated frame.
+Every image at every stage is also saved as a standalone PNG (no titles, no axes — just the actual GPU-processed array, colormapped only for the binary masks and label images).
 
 - [`dgx_spark/hello_cucim/`](./dgx_spark/hello_cucim) — 4 PNGs (1024×1024) of the single-image pipeline
 - [`dgx_spark/relevant_uses/`](./dgx_spark/relevant_uses) — 24 PNGs (512×512), 6 tiles × 4 stages
