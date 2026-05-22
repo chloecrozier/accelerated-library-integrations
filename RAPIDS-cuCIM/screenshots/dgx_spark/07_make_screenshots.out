@@ -1,0 +1,52 @@
+GPU: NVIDIA GB10
+Output dir: /home/jcasalmontse/cuCIM-examples/screenshots
+
+Generating composite PNG screenshots...
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_pipeline.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses_tiles.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_blobs_pipeline.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_mitosis_pipeline.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_ihc_pipeline.png
+
+Generating individual raw PNGs of every stage...
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim/01_raw.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim/02_blurred.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim/03_thresholded.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim/04_labels.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_0_01_raw.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_0_02_blurred.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_0_03_thresholded.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_0_04_labels.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_1_01_raw.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_1_02_blurred.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_1_03_thresholded.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_1_04_labels.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_2_01_raw.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_2_02_blurred.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_2_03_thresholded.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_2_04_labels.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_3_01_raw.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_3_02_blurred.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_3_03_thresholded.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_3_04_labels.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_4_01_raw.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_4_02_blurred.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_4_03_thresholded.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_4_04_labels.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_5_01_raw.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_5_02_blurred.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_5_03_thresholded.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/relevant_uses/tile_5_04_labels.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_blobs/01_raw.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_blobs/02_blurred.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_blobs/03_thresholded.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_blobs/04_labels.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_mitosis/01_raw.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_mitosis/02_blurred.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_mitosis/03_thresholded.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_mitosis/04_labels.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_ihc/01_raw_rgb.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_ihc/02_hematoxylin.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_ihc/03_thresholded.png
+wrote /home/jcasalmontse/cuCIM-examples/screenshots/hello_cucim_ihc/04_labels.png
+Done.

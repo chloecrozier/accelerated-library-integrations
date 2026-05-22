@@ -1,0 +1,9 @@
+/home/jcasalmontse/cuCIM-examples/relevant_uses.py:41: FutureWarning: Parameter `min_size` is deprecated since version 26.04 and will be removed in 26.12 (or later). To avoid this warning, please use the parameter `max_size` instead. For more details, see the documentation of `remove_small_objects`. Note that the new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones.
+  tissue_mask = morphology.remove_small_objects(tissue_mask, min_size=32)
+cuCIM First Bowl of Soup demo
+GPU device: NVIDIA GB10
+Tiles processed: 128
+Tile size: 512 x 512
+Detected regions: 128
+Elapsed preprocessing time: 0.188 seconds
+Throughput: 679.86 tiles/second

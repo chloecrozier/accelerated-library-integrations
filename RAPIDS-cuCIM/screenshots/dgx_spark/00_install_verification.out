@@ -1,0 +1,5 @@
+cuCIM version: 26.04.00
+CuPy version: 14.0.1
+CUDA runtime: 13.1
+GPU 0: NVIDIA GB10 (compute 12.1)
+PASS: cuCIM is installed and the GPU image workflow is working.

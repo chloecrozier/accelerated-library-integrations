@@ -1,0 +1,5 @@
+Hello cuCIM
+Input type: <class 'cupy.ndarray'>
+GPU device: NVIDIA GB10
+Image shape: (1024, 1024)
+Detected regions: 1
