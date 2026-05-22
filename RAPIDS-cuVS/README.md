@@ -93,4 +93,4 @@ The default embedding model is [`mist-models/mist-28M-ti624ev1`](https://hugging
 
 ## Contributor
 
-TBD
+Anoushka Bhutani
