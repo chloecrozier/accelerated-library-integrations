@@ -64,7 +64,17 @@ This loads the bundled wine quality CSV with cuDF, separates features from the
 known `quality` label, trains one cuML Random Forest classifier, and prints
 test-set accuracy.
 
-## 6. Optional JupyterLab over SSH
+## 6. Run the optional CPU vs GPU benchmark
+
+```bash
+python examples/benchmark_sklearn_vs_cuml.py --scale 25
+```
+
+This repeats the small wine dataset, then compares scikit-learn Random Forest
+on CPU against cuML Random Forest on GPU. The timing covers model training plus
+prediction.
+
+## 7. Optional JupyterLab over SSH
 
 On the remote machine:
 
