@@ -68,6 +68,12 @@ Run the basic examples:
 python examples/wine_quality_cuml.py
 ```
 
+Optional CPU vs GPU timing comparison:
+
+```bash
+python examples/benchmark_sklearn_vs_cuml.py --scale 25
+```
+
 `examples/SETUP.md` has the step-by-step runbook for Brev or DGX Spark.
 
 Example output from running the project on a Brev GPU instance:
@@ -101,6 +107,8 @@ This connects to AIPS:
 
 - `examples/install_verification.py` - checks RAPIDS imports and GPU access.
 - `examples/wine_quality_cuml.py` - GPU version for Brev or DGX Spark.
+- `examples/benchmark_sklearn_vs_cuml.py` - optional CPU sklearn vs GPU cuML
+  timing comparison.
 - `dataset/winequality-white.csv` - dataset used by the examples.
 
 ## Helpful Links
