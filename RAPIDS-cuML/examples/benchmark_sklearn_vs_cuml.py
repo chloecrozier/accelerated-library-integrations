@@ -1,7 +1,8 @@
 """Compare CPU scikit-learn and GPU cuML on the wine quality dataset.
 
-The original CSV is small, so this script repeats the rows with --scale to make
-the timing difference easier to see on a GPU instance.
+The original CSV is small, so this script repeats the train and test splits with
+--scale to make the timing difference easier to see on a GPU instance. The
+split happens before scaling so duplicate rows do not leak across train/test.
 """
 
 import argparse
@@ -59,14 +60,16 @@ def make_parser():
 
 def run_sklearn(scale, trees, max_depth):
     base_df = pd.read_csv(DATASET, sep=";")
-    df = pd.concat([base_df] * scale, ignore_index=True)
+    X_base = base_df.drop(columns=["quality"]).astype("float32")
+    y_base = base_df["quality"].astype("int32")
 
-    X = df.drop(columns=["quality"]).astype("float32")
-    y = df["quality"].astype("int32")
-
-    X_train, X_test, y_train, y_test = sklearn_train_test_split(
-        X, y, test_size=0.2, random_state=42
+    X_train_base, X_test_base, y_train_base, y_test_base = sklearn_train_test_split(
+        X_base, y_base, test_size=0.2, random_state=42
     )
+    X_train = pd.concat([X_train_base] * scale, ignore_index=True)
+    X_test = pd.concat([X_test_base] * scale, ignore_index=True)
+    y_train = pd.concat([y_train_base] * scale, ignore_index=True)
+    y_test = pd.concat([y_test_base] * scale, ignore_index=True)
 
     model = SklearnRandomForest(
         n_estimators=trees,
@@ -80,19 +83,21 @@ def run_sklearn(scale, trees, max_depth):
     predictions = model.predict(X_test)
     elapsed = time.perf_counter() - start
 
-    return len(df), elapsed, sklearn_accuracy_score(y_test, predictions)
+    return len(X_train) + len(X_test), elapsed, sklearn_accuracy_score(y_test, predictions)
 
 
 def run_cuml(scale, trees, max_depth):
     base_df = cudf.read_csv(str(DATASET), sep=";")
-    df = cudf.concat([base_df] * scale, ignore_index=True)
+    X_base = base_df.drop(columns=["quality"]).astype("float32")
+    y_base = base_df["quality"].astype("int32")
 
-    X = df.drop(columns=["quality"]).astype("float32")
-    y = df["quality"].astype("int32")
-
-    X_train, X_test, y_train, y_test = cuml_train_test_split(
-        X, y, test_size=0.2, random_state=42
+    X_train_base, X_test_base, y_train_base, y_test_base = cuml_train_test_split(
+        X_base, y_base, test_size=0.2, random_state=42
     )
+    X_train = cudf.concat([X_train_base] * scale, ignore_index=True)
+    X_test = cudf.concat([X_test_base] * scale, ignore_index=True)
+    y_train = cudf.concat([y_train_base] * scale, ignore_index=True)
+    y_test = cudf.concat([y_test_base] * scale, ignore_index=True)
 
     model = CuMLRandomForest(
         n_estimators=trees,
@@ -105,7 +110,7 @@ def run_cuml(scale, trees, max_depth):
     predictions = model.predict(X_test)
     elapsed = time.perf_counter() - start
 
-    return len(df), elapsed, to_float(cuml_accuracy_score(y_test, predictions))
+    return len(X_train) + len(X_test), elapsed, to_float(cuml_accuracy_score(y_test, predictions))
 
 
 def main():
