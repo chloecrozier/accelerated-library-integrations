@@ -40,6 +40,7 @@ def main():
     print_section("Input edge list")
     print(edges)
 
+    # Build a directed graph from the edge list, then run PageRank and BFS on it.
     directed_graph = cugraph.Graph(directed=True)
     directed_graph.from_cudf_edgelist(
         edges, source="src", destination="dst", edge_attr="weight"
@@ -53,6 +54,7 @@ def main():
     bfs = cugraph.bfs(directed_graph, start=0)
     print(bfs.sort_values("vertex"))
 
+    # Build an undirected graph from the same edge list, then run weakly connected components on it.
     undirected_graph = cugraph.Graph(directed=False)
     undirected_graph.from_cudf_edgelist(
         edges, source="src", destination="dst", edge_attr="weight"
