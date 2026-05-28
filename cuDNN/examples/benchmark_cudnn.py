@@ -99,6 +99,19 @@ def time_callable(
         return statistics.median(samples)
 
 
+@contextmanager
+def nvtx_range(label: str, device: torch.device) -> Iterable[None]:
+    if device.type != "cuda":
+        yield
+        return
+
+    torch.cuda.nvtx.range_push(label)
+    try:
+        yield
+    finally:
+        torch.cuda.nvtx.range_pop()
+
+
 def build_conv2d(device: torch.device, batch_size: int) -> tuple[Callable[[], torch.Tensor], int]:
     model = torch.nn.Sequential(
         torch.nn.Conv2d(64, 128, kernel_size=3, padding=1, bias=True),
@@ -149,7 +162,8 @@ def run_one_benchmark(
     for mode in modes:
         with cudnn_settings(mode.cudnn_enabled, mode.cudnn_benchmark):
             fn, images_per_iter = builder(mode.device, batch_size)
-            latency_ms = time_callable(fn, mode.device, warmup, iters)
+            with nvtx_range(f"{benchmark_name} | {mode.label}", mode.device):
+                latency_ms = time_callable(fn, mode.device, warmup, iters)
 
         if mode.device.type == "cpu":
             cpu_latency = latency_ms
