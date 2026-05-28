@@ -91,12 +91,21 @@ Jupyter output.
 ## 7. Optional Nsight Systems capture
 
 The PyTorch benchmark is the required path. If Nsight Systems is available, use
-it to capture a short profile for the fused-operation discussion:
+the single-inference profiler target to produce a clean visual comparison:
 
 ```bash
-nsys profile --trace=cuda,cudnn,nvtx -o screenshots/cudnn_benchmark \
-    python3 examples/benchmark_cudnn.py --platform nsys_capture --iters 10 \
-    --output results/nsys_capture.csv
+nsys profile --force-overwrite=true --trace=cuda,cudnn,nvtx \
+    --sample=none --cpuctxsw=none \
+    -o screenshots/brev_l4_single_inference \
+    python3 examples/profile_inference_for_nsight.py \
+        --platform brev_l4 --workload resnet18 --warmup 1 --runs 1 \
+        --output results/brev_l4_single_inference.csv
 ```
+
+Open the `.nsys-rep` in Nsight Systems and look for the labeled NVTX ranges:
+
+- `MEASURE | resnet18 | 01 CPU | inference 1`
+- `MEASURE | resnet18 | 02 GPU, cuDNN disabled | inference 1`
+- `MEASURE | resnet18 | 03 GPU, cuDNN enabled | inference 1`
 
 Save screenshots of the timeline under `screenshots/`.

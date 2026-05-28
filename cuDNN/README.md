@@ -122,6 +122,8 @@ This connects to AIPS:
   convolution.
 - `examples/benchmark_cudnn.py` - runs the Conv2d and ResNet-18 benchmark and
   writes CSV results.
+- `examples/profile_inference_for_nsight.py` - runs one labeled inference per
+  mode for cleaner Nsight Systems screenshots.
 - `examples/cudnn_resnet18_benchmark.ipynb` - notebook flow for the final demo
   and charts.
 - `examples/README.md` - setup and runbook for Brev or DGX Spark.
