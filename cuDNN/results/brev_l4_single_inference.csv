@@ -1,0 +1,4 @@
+platform_label,workload,mode,run,device_name,cudnn_version,batch_size,wall_latency_ms,cuda_event_ms
+brev_l4,resnet18,01 CPU,1,CPU,91900,32,947.5287469977047,
+brev_l4,resnet18,"02 GPU, cuDNN disabled",1,NVIDIA L4,91900,32,30.67765499872621,30.583295822143555
+brev_l4,resnet18,"03 GPU, cuDNN enabled",1,NVIDIA L4,91900,32,8.75947400345467,8.701600074768066
