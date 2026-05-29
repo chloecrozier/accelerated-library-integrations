@@ -83,27 +83,26 @@ The notebook version is available at
 
 ## Relevant Use Case
 
-**First Bowl of Soup: Computer vision inference for manufacturing quality
-inspection**
+**First Bowl of Soup: ChatGPT-style enterprise support assistant**
 
-A manufacturing partner may run camera-based inspection on an assembly line.
-The application captures images of parts, preprocesses them, sends batches to a
-CNN classifier or defect detector, and writes predictions into a quality
-dashboard or factory control system.
+A partner building an internal support chatbot needs low-latency answers over
+company docs, tickets, and product knowledge. cuDNN sits below the AI framework
+and accelerates supported deep learning primitives, including attention paths
+used by transformer models.
 
 cuDNN fits into the workflow under the model framework:
 
-1. Cameras capture images from the line.
-2. A preprocessing service batches and normalizes images.
-3. A PyTorch vision model, such as ResNet, runs inference on an NVIDIA GPU.
-4. cuDNN accelerates the convolution, normalization, activation, and pooling
-   operations used by the model.
-5. The application sends pass/fail labels, confidence scores, and defect
-   metadata to downstream dashboards or alerting systems.
+1. A user asks a question in a chat UI.
+2. A retrieval service finds relevant internal documents.
+3. The prompt and context are tokenized and sent to a transformer model.
+4. The framework runs inference on an NVIDIA GPU.
+5. cuDNN accelerates supported operations such as scaled dot product attention,
+   normalization, pointwise ops, and other neural network primitives.
+6. The application streams the answer back to the user and logs feedback.
 
-This is relevant to an SA because the integration path is low friction. A
-partner can keep a familiar PyTorch workflow while cuDNN automatically maps the
-model's deep learning primitives to optimized NVIDIA GPU kernels.
+This is relevant to an SA because the integration path is low friction: partners
+can keep a familiar PyTorch or framework-based workflow while cuDNN maps
+supported model operations to optimized NVIDIA GPU kernels.
 
 This connects to AIPS:
 
@@ -113,8 +112,8 @@ This connects to AIPS:
   application from scratch.
 - **Promote:** show a clear before/after benchmark and an Nsight Systems view of
   cuDNN-backed GPU execution.
-- **Sell:** position NVIDIA GPUs as the easiest way to speed up existing deep
-  learning products.
+- **Sell:** position NVIDIA GPUs as the fastest path to lower-latency AI
+  experiences without a full application rewrite.
 
 ## Files
 
@@ -140,6 +139,8 @@ This connects to AIPS:
 - [Official cuDNN Documentation](https://docs.nvidia.com/deeplearning/cudnn/)
 - [cuDNN Installation Guide](https://docs.nvidia.com/deeplearning/cudnn/installation/latest/)
 - [cuDNN Backend Documentation](https://docs.nvidia.com/deeplearning/cudnn/backend/latest/)
+- [cuDNN Attention Operation](https://docs.nvidia.com/deeplearning/cudnn/latest/operations/Attention.html)
+- [Accelerating Transformers with NVIDIA cuDNN 9](https://developer.nvidia.com/blog/accelerating-transformers-with-nvidia-cudnn-9/)
 - [cuDNN Frontend GitHub Repository](https://github.com/NVIDIA/cudnn-frontend)
 - [PyTorch Get Started](https://pytorch.org/get-started/locally/)
 - [PyTorch CUDA Semantics](https://pytorch.org/docs/stable/notes/cuda.html)
