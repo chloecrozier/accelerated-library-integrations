@@ -125,14 +125,14 @@ This connects to AIPS:
   mode for cleaner Nsight Systems screenshots.
 - `examples/cudnn_resnet18_benchmark.ipynb` - notebook flow for the final demo
   and charts.
+- `examples/fused_conv_bias_relu_demo.cu` - optional direct cuDNN C++ demo of a
+  fused convolution, bias, and ReLU call.
 - `examples/README.md` - setup and runbook for Brev or DGX Spark.
-- `cpp/fused_conv_bias_relu_demo.cu` - optional direct cuDNN C++ demo of a fused
-  convolution, bias, and ReLU call.
 - `requirements-torch-cu128.txt` - CUDA 12.8 PyTorch install requirements.
 - `requirements.txt` - charting and notebook dependencies.
 - `results/` - CSV outputs from Brev L4 and DGX Spark.
-- `screenshots/` - benchmark plots and optional Nsight Systems reports or
-  screenshots.
+- `screenshots/` - Brev L4 / DGX Spark benchmark proof screenshots, the
+  presentation latency chart, and the optional Nsight Systems report.
 
 ## Helpful Links
 

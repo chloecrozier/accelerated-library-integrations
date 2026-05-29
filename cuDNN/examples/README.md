@@ -109,3 +109,19 @@ Open the `.nsys-rep` in Nsight Systems and look for the labeled NVTX ranges:
 - `MEASURE | resnet18 | 03 GPU, cuDNN enabled | inference 1`
 
 Save screenshots of the timeline under `screenshots/`.
+
+## 8. Optional Direct cuDNN C++ Demo
+
+The main project demonstrates cuDNN the way most customers encounter it:
+through PyTorch. The optional C++ file shows the lower-level cuDNN API for a
+fused convolution, bias, and ReLU call.
+
+Build only on a machine with CUDA, cuDNN headers, and cuDNN libraries installed:
+
+```bash
+nvcc -std=c++17 examples/fused_conv_bias_relu_demo.cu -lcudnn -o fused_conv_bias_relu_demo
+./fused_conv_bias_relu_demo
+```
+
+If the target image does not include cuDNN development headers, skip this path
+and use the Python benchmark plus Nsight Systems profile instead.
