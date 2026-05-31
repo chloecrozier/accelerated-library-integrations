@@ -1,0 +1,38 @@
+/home/ubuntu/.venv/lib/python3.12/site-packages/cugraph/link_analysis/pagerank.py:206: UserWarning: Pagerank expects the 'store_transposed' flag to be set to 'True' for optimal performance during the graph creation
+  warnings.warn(warning_msg, UserWarning)
+Loaded 341,216 authentication events
+  red-team events:  316
+  unique src hosts: 11,562
+  unique dst hosts: 9,182
+
+Known-compromised seed host: C17693 (vertex 0)
+
+Hosts reachable from seed: 11,775
+
+Top 20 hosts by risk score (PageRank + BFS proximity)
+-------------------------------------------------------
+host_name  pagerank  distance  risk_score
+    C2106  0.151083         2   18.441648
+     C625  0.080511         2   11.384430
+     C467  0.075169         2   10.850235
+    C1065  0.072733         2   10.606606
+     C457  0.071064         2   10.439720
+   C17693  0.000015         0   10.001478
+     C529  0.061043         2    9.437648
+     C586  0.059016         2    9.234900
+     C528  0.043555         2    7.688798
+     C612  0.040431         2    7.376429
+    C1015  0.007411         1    5.741062
+     C492  0.006214         1    5.621375
+     C706  0.002327         1    5.232672
+     C231  0.002129         1    5.212902
+    C3173  0.000783         1    5.078342
+    C1611  0.000581         1    5.058092
+     C801  0.000576         1    5.057611
+    C1737  0.000295         1    5.029469
+      C92  0.000283         1    5.028279
+     C754  0.000213         1    5.021255
+
+Red-team destinations recovered in top 20: 14/189
+
+Workflow fit: a SOC analyst feeds the compromised host into the pipeline, cuGraph ranks every other host by attacker pivot risk, and the top of the list becomes the isolation / investigation queue.
