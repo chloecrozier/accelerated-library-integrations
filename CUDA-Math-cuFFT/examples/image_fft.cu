@@ -183,8 +183,8 @@ int main() {
   CUFFT_CALL(cufftExecR2C(plan_r2c, d_input, d_spectrum));
 
   // Create two new filtered spectrums.
-  filterKernel<<<1, 128, 0>>>(d_spectrum, d_lowpass_spectrum, width, height, freq_width, 0.05f, true);
-  filterKernel<<<1, 128, 0>>>(d_spectrum, d_highpass_spectrum, width, height, freq_width, 0.1f, false);
+  filterKernel<<<1, 128, 0>>>(d_spectrum, d_lowpass_spectrum, width, height, freq_width, 0.01f, true);
+  filterKernel<<<1, 128, 0>>>(d_spectrum, d_highpass_spectrum, width, height, freq_width, 0.03f, false);
 
   CUDA_RT_CALL(cudaGetLastError());
 

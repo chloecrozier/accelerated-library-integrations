@@ -92,6 +92,24 @@ Sample output is shown below.
   <em>Lowpass filtered</em>
 </p>
 
+### Quick Benchmark
+
+To run a quick benchmark, install the [uv](https://docs.astral.sh/uv/getting-started/installation/) package manager
+and run `uv run benchmark.py`. This benchmark uses PyTorch as a frontend.
+
+Example results running on a DGX Spark (B10 GPU, CUDA 13), presented time is median
+wall clock time over 100 runs excluding host <-> device copies.
+
+|         n | CPU FFT (s) | GPU cuFFT (s) | Speedup |
+| --------: | ----------: | ------------: | ------: |
+|    16,384 |    0.000044 |      0.000024 |   1.81× |
+|    20,000 |    0.000058 |      0.000027 |   2.19× |
+|    65,536 |    0.000188 |      0.000029 |   6.47× |
+|   100,000 |    0.000318 |      0.000030 |  10.43× |
+|   262,144 |    0.000846 |      0.000031 |  27.68× |
+| 1,000,000 |    0.006523 |      0.000079 |  82.10× |
+| 1,048,576 |    0.005908 |      0.000068 |  86.66× |
+| 4,194,304 |    0.029544 |      0.000428 |  68.95× |
 
 ## Relevant Use Case
 
