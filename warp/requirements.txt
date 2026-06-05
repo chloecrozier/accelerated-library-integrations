@@ -1,0 +1,5 @@
+warp-lang
+warp-lang[examples]
+matplotlib 
+ipympl 
+Pillow
