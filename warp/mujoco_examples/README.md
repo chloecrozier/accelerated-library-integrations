@@ -2,7 +2,7 @@
 
 Examples for benchmarking GPU-accelerated robot learning with [MuJoCo Playground](https://github.com/google-deepmind/mujoco_playground). Playground supports two physics backends: the default **JAX** implementation of MuJoCo MJX, and **Warp** via [`mujoco_warp`](https://github.com/google-deepmind/mujoco_warp). The benchmark script trains a PPO agent on the `WalkerRun` locomotion task with both backends so you can compare sample throughput, wall-clock training time, and learned policy quality on your GPU.
 
-**JAX vs Warp.** JAX/MJX is often fastest on small, low-contact environments (for example `CartpoleBalance`) where physics is cheap and the whole RL loop fuses cleanly through XLA. Warp tends to pull ahead as simulation cost grows with more complex scenes and more contact points.
+**JAX vs Warp.** JAX/MJX is often fastest on small, low-contact environments (for example `CartpoleBalance`) where physics is cheap. Warp tends to pull ahead as simulation cost grows with more complex scenes and more contact points.
 
 ## Requirements
 - CUDA-enabled NVIDIA GPU
