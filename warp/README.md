@@ -22,6 +22,8 @@ Software:
 
 For other setups (e.g. latest nightly build, Docker, Omniverse), refer to the full [installation guide](https://nvidia.github.io/warp/stable/user_guide/installation.html). Some features may require [additional dependencies](https://nvidia.github.io/warp/stable/user_guide/installation.html) that do not support the latest version of Python.
 
+> All examples developed in this repo were run on an NVIDIA L4 Brev instance
+
 ## Installation & Basic Functionality
 
 Install Warp, confirm the bundled FEM example runs on your device, then try the local scripts below.
@@ -57,16 +59,18 @@ Module warp._src.fem.space.basis_space.dyn.fill_node_positions_93a2f4f4 e693b8f 
 | File | Expected behavior | 
 | --- | --- |
 | [`examples/gravity.py`](/warp/examples/gravity.py) |   Terminal output similar to the example above. Try toggling the cpu / cuda flag in [`gravity.py`](/warp/examples/gravity.py) with `wp.set_device("cpu")` and `wp.set_device("cuda")`. |
-| [`examples/example_mesh.py`](/warp/examples/example_mesh.py) | PBD particle simulation with mesh collision. Run `python3 examples/example_mesh.py` (default: `bunny` mesh). Swap meshes with `--object` flag. USD assets live in [`examples/assets/`](/warp/examples/assets/). Writes `example_mesh.usd` and prints a success message when done. |
-| [`mujoco_examples/`](/warp/mujoco_examples/) | PPO training sweep on `CartpoleBalance` comparing `--impl jax` vs `--impl warp` at 512–4096 parallel envs. See [mujoco_examples/README.md](/warp/mujoco_examples/README.md). |
+| [`examples/example_mesh.py`](/warp/examples/example_mesh.py) | PBD particle simulation with mesh collision. Run `python3 examples/example_mesh.py` (default: `bunny` mesh). Swap meshes with `--object` flag. USD assets live in [`examples/assets/`](/warp/examples/assets/). Writes rendered simulation to `example_mesh.usd` and prints a success message when done. |
+| [`mujoco_examples/`](/warp/mujoco_examples/) | PPO training on `WalkerRun` comparing `--impl jax` vs `--impl warp`. See [mujoco_examples/README.md](/warp/mujoco_examples/README.md). |
 
 ## Relevant Use Case
 
-**Parallel RL training — JAX vs MuJoCo Warp on Playground**
+**RL training — JAX vs MuJoCo Warp**
 
-Robot policy training is often simulation-bound: PPO and similar algorithms need millions of environment steps, and wall-clock time is dominated by physics rollouts rather than the policy network.
+Robot policy training is often simulation-bound: PPO and similar algorithms need millions of environment steps, and wall-clock time can be dominated by physics rollouts rather than the policy network.
 
-[`mujoco_examples/mujoco_jax_warp.py`](/warp/mujoco_examples/mujoco_jax_warp.py) runs the same short PPO job on `CartpoleBalance` with `--impl jax` (MuJoCo MJX) and `--impl warp` (MuJoCo Warp), sweeping `num_envs` from 512 to 4096. Each run logs `eval/episode_reward`, JIT compile time, and total training time so you can compare sample throughput on your GPU.
+[`mujoco_examples/mujoco_jax_warp.py`](/warp/mujoco_examples/mujoco_jax_warp.py) runs the same PPO job on `WalkerRun` with `--impl jax` (MuJoCo MJX) and `--impl warp` (MuJoCo Warp). Each run logs `eval/episode_reward`, JIT compile time, and total training time, then renders a rollout video from the final checkpoint.
+
+JAX/MJX is a strong default for small classic-control tasks where per-step physics is light. Warp is built for GPU-native batch simulation and usually scales better when rollouts are expensive—locomotion with contacts, manipulation, vision rendering, or thousands of parallel environments. `WalkerRun` is a contact-rich locomotion benchmark that reflects the workloads where MuJoCo Warp is meant to shine.
 
 ```bash
 cd warp/mujoco_examples
@@ -78,7 +82,7 @@ For a single backend comparison after [building Playground](/warp/mujoco_example
 ```bash
 cd mujoco_playground && source .venv/bin/activate
 MUJOCO_GL=egl uv --no-config run train-jax-ppo \
-  --env_name=CartpoleBalance --impl=warp --num_envs=2048
+  --env_name=WalkerRun --impl=warp --num_timesteps=150000000 --seed=1
 ```
 
 Use this workflow when scaling RL experiments to thousands of parallel worlds—locomotion, manipulation, or custom  environments where GPU batching matters more than single-env latency.
