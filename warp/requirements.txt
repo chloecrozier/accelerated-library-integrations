@@ -1,0 +1,16 @@
+warp-lang
+warp-lang[examples]
+matplotlib 
+ipympl 
+Pillow
+
+mujoco
+mujoco-warp
+mujoco-mjx
+
+# MuJoCo Playground RL benchmark (warp/example_rl_training/)
+# PyPI playground==0.1.0 is stale vs mujoco-mjx 3.9 (nconmax -> naconmax).
+# Prefer HEAD when on Python 3.11+: git+https://github.com/google-deepmind/mujoco_playground.git
+# playground
+jax[cuda12]
+mediapy
