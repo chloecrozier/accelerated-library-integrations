@@ -60,7 +60,6 @@ def build_decoder(
     max_iterations=50,
     error_rate=None,
     bp_method=None,
-    proc_float=None,
 ):
     if decoder_name == "nv-qldpc-decoder":
         kwargs = {
@@ -72,8 +71,6 @@ def build_decoder(
             kwargs["error_rate"] = float(error_rate)
         if bp_method is not None:
             kwargs["bp_method"] = int(bp_method)
-        if proc_float is not None:
-            kwargs["proc_float"] = proc_float
         try:
             return qec.get_decoder(decoder_name, h_matrix, **kwargs)
         except Exception as exc:

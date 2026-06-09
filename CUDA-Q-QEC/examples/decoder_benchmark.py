@@ -34,7 +34,6 @@ def parse_args():
     parser.add_argument("--max-iterations", type=int, default=50)
     parser.add_argument("--bp-batch-size", type=int, default=1000)
     parser.add_argument("--bp-method", type=int, default=None, help="QLDPC BP method, e.g. 1 for min-sum")
-    parser.add_argument("--proc-float", default=None, help="QLDPC float type, e.g. fp32 or fp64")
     parser.add_argument("--output", help="CSV output path")
     return parser.parse_args()
 
@@ -118,7 +117,6 @@ def main():
         args.max_iterations,
         args.p,
         args.bp_method,
-        args.proc_float,
     )
 
     print(
@@ -151,7 +149,6 @@ def main():
         "max_ms": max(samples_ms),
         "syndromes_per_second": throughput,
         "bp_method": args.bp_method if args.bp_method is not None else "",
-        "proc_float": args.proc_float or "",
         "logical_errors_without_decoding": logical_without,
         "logical_errors": logical_with,
         "logical_error_rate": logical_with / args.shots,
@@ -163,7 +160,6 @@ def main():
     print(f"Decoder:      {args.decoder}")
     if args.decoder == "nv-qldpc-decoder":
         print(f"BP method:    {row['bp_method'] or 'default'}")
-        print(f"Proc float:   {row['proc_float'] or 'default'}")
     print(f"Median time:  {median_ms:.3f} ms")
     print(f"Throughput:   {throughput:,.1f} syndromes/s")
     print(f"Logical errs: {logical_with}/{args.shots}")
