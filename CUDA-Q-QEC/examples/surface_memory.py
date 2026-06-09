@@ -52,21 +52,20 @@ def preprocess_syndromes(np, syndromes, shots, rounds, expected_len):
     )
 
 
-def build_decoder(qec, decoder_name, h_matrix, dem, batch_size, max_iterations=50):
+def build_decoder(qec, decoder_name, h_matrix, batch_size, max_iterations=50, error_rate=None):
     if decoder_name == "nv-qldpc-decoder":
         kwargs = {
-            "max_iterations": max_iterations,
-            "use_sparsity": True,
-            "bp_batch_size": batch_size,
+            "max_iterations": int(max_iterations),
+            "bp_batch_size": int(batch_size),
         }
-        if hasattr(dem, "error_rates"):
-            kwargs["error_rate_vec"] = dem.error_rates
+        if error_rate is not None:
+            kwargs["error_rate"] = float(error_rate)
         try:
             return qec.get_decoder(decoder_name, h_matrix, **kwargs)
         except Exception as exc:
             raise SystemExit(
-                "FAIL: nv-qldpc-decoder is not available in this environment. "
-                "Use a supported CUDA-Q QEC GPU setup or try single_error_lut.\n"
+                "FAIL: could not create nv-qldpc-decoder. "
+                "Use the CUDA-QX container or try single_error_lut.\n"
                 f"Decoder error: {exc}"
             ) from exc
 
@@ -103,9 +102,9 @@ def run_memory_point(np, cudaq, qec, distance, rounds, p, shots, decoder_name, b
     noise.add_all_qubit_channel("x", cudaq.Depolarization2(p), 1)
 
     dem = qec.z_dem_from_memory_circuit(code, state_prep, rounds, noise)
-    h_matrix = np.asarray(dem.detector_error_matrix, dtype=np.uint8)
+    h_matrix = np.ascontiguousarray(dem.detector_error_matrix, dtype=np.uint8)
     observables = np.asarray(dem.observables_flips_matrix, dtype=np.uint8)
-    decoder = build_decoder(qec, decoder_name, h_matrix, dem, min(batch_size, shots), max_iterations)
+    decoder = build_decoder(qec, decoder_name, h_matrix, min(batch_size, shots), max_iterations, p)
 
     logical_errors_without = 0
     logical_errors_with = 0

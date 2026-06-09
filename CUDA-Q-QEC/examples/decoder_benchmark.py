@@ -106,9 +106,9 @@ def main():
     noise.add_all_qubit_channel("x", cudaq.Depolarization2(args.p), 1)
 
     dem = qec.z_dem_from_memory_circuit(code, state_prep, rounds, noise)
-    h_matrix = np.asarray(dem.detector_error_matrix, dtype=np.uint8)
+    h_matrix = np.ascontiguousarray(dem.detector_error_matrix, dtype=np.uint8)
     observables = np.asarray(dem.observables_flips_matrix, dtype=np.uint8)
-    decoder = build_decoder(qec, args.decoder, h_matrix, dem, min(args.bp_batch_size, args.shots), args.max_iterations)
+    decoder = build_decoder(qec, args.decoder, h_matrix, min(args.bp_batch_size, args.shots), args.max_iterations, args.p)
 
     print(
         f"Preparing one workload "
