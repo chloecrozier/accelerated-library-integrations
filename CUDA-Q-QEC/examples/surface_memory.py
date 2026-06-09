@@ -57,6 +57,7 @@ def build_decoder(qec, decoder_name, h_matrix, batch_size, max_iterations=50, er
         kwargs = {
             "max_iterations": int(max_iterations),
             "bp_batch_size": int(batch_size),
+            "use_sparsity": True,
         }
         if error_rate is not None:
             kwargs["error_rate"] = float(error_rate)
