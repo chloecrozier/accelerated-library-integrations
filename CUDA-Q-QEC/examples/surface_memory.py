@@ -52,7 +52,16 @@ def preprocess_syndromes(np, syndromes, shots, rounds, expected_len):
     )
 
 
-def build_decoder(qec, decoder_name, h_matrix, batch_size, max_iterations=50, error_rate=None):
+def build_decoder(
+    qec,
+    decoder_name,
+    h_matrix,
+    batch_size,
+    max_iterations=50,
+    error_rate=None,
+    bp_method=None,
+    proc_float=None,
+):
     if decoder_name == "nv-qldpc-decoder":
         kwargs = {
             "max_iterations": int(max_iterations),
@@ -61,6 +70,10 @@ def build_decoder(qec, decoder_name, h_matrix, batch_size, max_iterations=50, er
         }
         if error_rate is not None:
             kwargs["error_rate"] = float(error_rate)
+        if bp_method is not None:
+            kwargs["bp_method"] = int(bp_method)
+        if proc_float is not None:
+            kwargs["proc_float"] = proc_float
         try:
             return qec.get_decoder(decoder_name, h_matrix, **kwargs)
         except Exception as exc:

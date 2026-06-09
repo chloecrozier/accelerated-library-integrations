@@ -33,6 +33,8 @@ def parse_args():
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--max-iterations", type=int, default=50)
     parser.add_argument("--bp-batch-size", type=int, default=1000)
+    parser.add_argument("--bp-method", type=int, default=None, help="QLDPC BP method, e.g. 1 for min-sum")
+    parser.add_argument("--proc-float", default=None, help="QLDPC float type, e.g. fp32 or fp64")
     parser.add_argument("--output", help="CSV output path")
     return parser.parse_args()
 
@@ -82,7 +84,7 @@ def main():
             "single_error_lut": "lut",
             "nv-qldpc-decoder": "qldpc",
         }.get(args.decoder, args.decoder.replace("-", "_"))
-        args.output = str(PROJECT / "results" / f"decoder_{decoder_label}_{args.platform}.csv")
+        args.output = str(PROJECT / "results" / f"decoder_{decoder_label}_d{args.distance}_{args.platform}.csv")
 
     if args.shots < 1 or args.repeats < 1 or args.warmup < 0:
         sys.exit("FAIL: --shots and --repeats must be >= 1; --warmup must be >= 0")
@@ -108,7 +110,16 @@ def main():
     dem = qec.z_dem_from_memory_circuit(code, state_prep, rounds, noise)
     h_matrix = np.ascontiguousarray(dem.detector_error_matrix, dtype=np.uint8)
     observables = np.asarray(dem.observables_flips_matrix, dtype=np.uint8)
-    decoder = build_decoder(qec, args.decoder, h_matrix, min(args.bp_batch_size, args.shots), args.max_iterations, args.p)
+    decoder = build_decoder(
+        qec,
+        args.decoder,
+        h_matrix,
+        min(args.bp_batch_size, args.shots),
+        args.max_iterations,
+        args.p,
+        args.bp_method,
+        args.proc_float,
+    )
 
     print(
         f"Preparing one workload "
@@ -139,6 +150,8 @@ def main():
         "min_ms": min(samples_ms),
         "max_ms": max(samples_ms),
         "syndromes_per_second": throughput,
+        "bp_method": args.bp_method if args.bp_method is not None else "",
+        "proc_float": args.proc_float or "",
         "logical_errors_without_decoding": logical_without,
         "logical_errors": logical_with,
         "logical_error_rate": logical_with / args.shots,
@@ -148,6 +161,9 @@ def main():
     print()
     print(f"GPU:          {row['gpu_name']}")
     print(f"Decoder:      {args.decoder}")
+    if args.decoder == "nv-qldpc-decoder":
+        print(f"BP method:    {row['bp_method'] or 'default'}")
+        print(f"Proc float:   {row['proc_float'] or 'default'}")
     print(f"Median time:  {median_ms:.3f} ms")
     print(f"Throughput:   {throughput:,.1f} syndromes/s")
     print(f"Logical errs: {logical_with}/{args.shots}")

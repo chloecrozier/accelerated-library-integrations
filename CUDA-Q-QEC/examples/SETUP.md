@@ -60,12 +60,21 @@ python examples/decoder_benchmark.py \
 python examples/decoder_benchmark.py \
   --decoder nv-qldpc-decoder \
   --shots 10000
+
+python examples/decoder_benchmark.py \
+  --decoder nv-qldpc-decoder \
+  --distance 7 \
+  --shots 10000 \
+  --bp-batch-size 10000
 ```
 
 These commands write Brev L4-labeled CSV files in `results/`.
 
 If `nv-qldpc-decoder` is unavailable, use `single_error_lut` to verify the
 workflow, then switch to the CUDA-QX container for the final benchmark.
+The QLDPC comparison is an accuracy-throughput tradeoff: LUT is a tiny teaching
+decoder, while QLDPC is the GPU-capable belief-propagation decoder for larger
+workloads.
 
 ## 5. Make Surface-Code Sweep Plots
 

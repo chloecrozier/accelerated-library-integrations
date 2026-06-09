@@ -57,6 +57,14 @@ def plot_steane(plt, rows, output_dir):
     return output
 
 
+def decoder_label(row):
+    decoder = row["decoder"].replace("single_error_lut", "LUT").replace("nv-qldpc-decoder", "QLDPC")
+    label = f"d={row.get('distance', '?')}\n{decoder}"
+    if row.get("bp_method"):
+        label += f"\nbp={row['bp_method']}"
+    return label
+
+
 def plot_decoder(plt, rows, output_dir):
     decoder_rows = [
         row
@@ -66,8 +74,8 @@ def plot_decoder(plt, rows, output_dir):
     if not decoder_rows:
         return
 
-    ordered = sorted(decoder_rows, key=lambda row: (row["decoder"], row["platform"]))
-    labels = [f"{row['platform']}\n{row['decoder']}" for row in ordered]
+    ordered = sorted(decoder_rows, key=lambda row: (int(row.get("distance", 0)), row["decoder"]))
+    labels = [decoder_label(row) for row in ordered]
     values = [float(row["syndromes_per_second"]) for row in ordered]
 
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -78,6 +86,33 @@ def plot_decoder(plt, rows, output_dir):
     fig.tight_layout()
 
     output = output_dir / "decoder_throughput.png"
+    fig.savefig(output, dpi=180)
+    plt.close(fig)
+    print(f"Wrote {output}")
+    return output
+
+
+def plot_decoder_accuracy(plt, rows, output_dir):
+    decoder_rows = [
+        row
+        for row in rows
+        if row.get("decoder") and row.get("distance") and row.get("logical_error_rate")
+    ]
+    if not decoder_rows:
+        return
+
+    ordered = sorted(decoder_rows, key=lambda row: (int(row["distance"]), row["decoder"]))
+    labels = [decoder_label(row) for row in ordered]
+    values = [float(row["logical_error_rate"]) for row in ordered]
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    bars = ax.bar(labels, values)
+    ax.set(title="CUDA-Q QEC Decoder Logical Error Rate", ylabel="Logical error rate")
+    ax.grid(True, axis="y", alpha=0.3)
+    ax.bar_label(bars, fmt=lambda value: f"{value:.3g}", padding=3)
+    fig.tight_layout()
+
+    output = output_dir / "decoder_logical_error_rate.png"
     fig.savefig(output, dpi=180)
     plt.close(fig)
     print(f"Wrote {output}")
@@ -106,6 +141,7 @@ def main():
     outputs = [
         plot_steane(plt, rows, output_dir),
         plot_decoder(plt, rows, output_dir),
+        plot_decoder_accuracy(plt, rows, output_dir),
     ]
     if not any(outputs):
         sys.exit("FAIL: no Steane or decoder benchmark rows found to plot")
