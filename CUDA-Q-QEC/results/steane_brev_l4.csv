@@ -1,7 +1,7 @@
 code,decoder,shots,physical_error_probability,raw_logical_errors,decoded_logical_errors,raw_logical_error_rate,decoded_logical_error_rate
-steane,single_error_lut,1000,0.001,4,0,0.004,0.0
-steane,single_error_lut,1000,0.003,13,0,0.013,0.0
-steane,single_error_lut,1000,0.01,30,4,0.03,0.004
-steane,single_error_lut,1000,0.03,84,28,0.084,0.028
-steane,single_error_lut,1000,0.05,126,33,0.126,0.033
-steane,single_error_lut,1000,0.1,248,127,0.248,0.127
+steane,single_error_lut,1000,0.001,2,0,0.002,0.0
+steane,single_error_lut,1000,0.003,7,0,0.007,0.0
+steane,single_error_lut,1000,0.01,30,3,0.03,0.003
+steane,single_error_lut,1000,0.03,92,20,0.092,0.02
+steane,single_error_lut,1000,0.05,129,40,0.129,0.04
+steane,single_error_lut,1000,0.1,247,141,0.247,0.141
