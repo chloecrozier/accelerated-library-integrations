@@ -16,9 +16,11 @@ This project uses CUDA-Q QEC for one workflow: estimating logical error rates.
 The presentation flow is:
 
 1. **Hello QEC:** the Steane demo shows the smallest complete QEC loop.
-2. **Realistic QEC:** the surface-code memory demo adds repeated syndrome
-   rounds and circuit-level noise.
-3. **Why GPUs matter:** the CPU/GPU syndrome benchmark and decoder
+2. **Realistic QEC:** the circuit-level surface-code memory sweep adds repeated
+   syndrome rounds, circuit-level noise, and a GPU-capable decoder.
+3. **Distance scaling:** the surface-code code-capacity sweep isolates direct
+   data errors to make the effect of increasing code distance easier to see.
+4. **Why GPUs matter:** the CPU/GPU syndrome benchmark and decoder
    time/accuracy benchmark show throughput and accuracy tradeoffs for repeated
    QEC work.
 
@@ -51,22 +53,25 @@ basic flow is:
 Included examples:
 
 - `examples/run_project.py` runs the standard project workflow with default
-  Brev L4 settings, including the Steane demo, surface-code demos, GPU
-  throughput checks, plots, and summary.
+  Brev L4 settings, including the Steane demo, QLDPC surface-code sweeps, GPU
+  throughput checks, decoder benchmark, plots, and summary.
 - `examples/install_verification.py` checks imports, Steane code access, and a
   tiny `single_error_lut` decode.
 - `examples/hello_syndrome.py` sweeps physical bit-flip probability for the
   Steane code and reports raw vs decoded logical error rates.
-- `examples/surface_memory.py` runs one surface-code memory experiment with
+- `examples/surface_memory.py` contains the one-point surface-code memory
+  helper used by the circuit-level sweep.
+- `examples/surface_sweep.py` creates the QLDPC circuit-level surface-code
+  memory sweep CSV and plot. It defaults to `rounds=d`, low physical error
+  rates, 10,000 shots, and distances 3, 5, and 7.
+- `examples/surface_code_capacity.py` creates the cleaner QLDPC surface-code
+  code-capacity CSV and plot by applying direct data errors instead of full
   circuit-level noise.
-- `examples/surface_sweep.py` creates LUT and QLDPC surface-code sweep CSVs.
-  It defaults to `rounds=d`, low physical error rates, 10,000 shots, and
-  distances 3, 5, and 7 to better approximate a threshold-style experiment.
 - `examples/cpu_gpu_benchmark.py` compares CPU NumPy and GPU CuPy throughput
   for the same batched QEC syndrome calculation.
 - `examples/decoder_benchmark.py` compares LUT and QLDPC BP=0 across distances
   3, 5, 7, 9, and 11 by default.
-- `examples/plot_results.py` creates combined presentation plots and
+- `examples/plot_results.py` creates presentation plots and
   `results/SUMMARY.md` from CSV outputs.
 
 ## Relevant Use Case
@@ -90,10 +95,11 @@ This connects to AIPS:
 - **Sell:** explain why NVIDIA GPUs matter before large-scale fault-tolerant
   QPUs are widely available.
 
-The surface-code sweep is closer to a research-style logical error-rate curve
-than the quick memory demo, but it still may not match published threshold plots
-exactly. Decoder choice, noise model, shot count, and the CUDA-Q QEC version all
-affect whether larger distance visibly lowers the measured logical error rate.
+The two surface-code sweeps answer different questions. The circuit-level
+memory sweep is the more realistic integration demo. The code-capacity sweep is
+the cleaner distance-scaling accuracy demo. Neither should be presented as a
+perfect reproduction of published threshold plots because decoder choice, noise
+model, shot count, and the CUDA-Q QEC version all affect the trend.
 
 ## Helpful Links
 

@@ -36,21 +36,6 @@ def cpu_gpu_rows(rows):
     return [row for row in rows if row.get("benchmark") == "cpu_gpu_syndrome"]
 
 
-def surface_sweep_rows(rows):
-    return [
-        row
-        for row in rows
-        if row.get("_source", "").startswith("surface_sweep_")
-        and row.get("logical_error_rate_with_decoding")
-    ]
-
-
-def surface_plot_title(rows):
-    if all(int(row["rounds"]) == int(row["distance"]) for row in rows):
-        return "Surface-Code Logical Error Rate, rounds=d"
-    return "Surface-Code Logical Error Rate, fixed/custom rounds"
-
-
 def plot_steane(plt, rows, output_dir):
     grouped = {}
     for row in rows:
@@ -106,73 +91,6 @@ def plot_cpu_gpu_speedup(plt, rows, output_dir):
     fig.tight_layout()
 
     output = output_dir / "cpu_gpu_speedup.png"
-    fig.savefig(output, dpi=180)
-    plt.close(fig)
-    print(f"Wrote {output}")
-    return output
-
-
-def decoder_name(row):
-    if row["decoder"] == "single_error_lut":
-        return "LUT"
-    if row["decoder"] == "nv-qldpc-decoder":
-        bp = row.get("bp_method", "")
-        return f"QLDPC BP={bp}" if bp else "QLDPC"
-    return row["decoder"]
-
-
-def plot_surface_combined(plt, rows, output_dir):
-    sweep_rows = surface_sweep_rows(rows)
-    if not sweep_rows:
-        return
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    styles = {
-        "single_error_lut": "--",
-        "nv-qldpc-decoder": "-",
-    }
-    markers = {
-        "single_error_lut": "s",
-        "nv-qldpc-decoder": "o",
-    }
-
-    groups = sorted(
-        {(row["decoder"], int(row["distance"])) for row in sweep_rows},
-        key=lambda item: (item[0], item[1]),
-    )
-    saw_zero = False
-    for decoder, distance in groups:
-        group = sorted(
-            [
-                row
-                for row in sweep_rows
-                if row["decoder"] == decoder and int(row["distance"]) == distance
-            ],
-            key=lambda row: float(row["physical_error_probability"]),
-        )
-        x = [float(row["physical_error_probability"]) for row in group]
-        y = []
-        for row in group:
-            rate_value = float(row["logical_error_rate_with_decoding"])
-            if rate_value == 0:
-                saw_zero = True
-                rate_value = 0.5 / float(row["shots"])
-            y.append(rate_value)
-        label = f"{decoder_name(group[0])}, d={distance}"
-        ax.plot(x, y, linestyle=styles.get(decoder, "-"), marker=markers.get(decoder, "o"), label=label)
-
-    ax.set_xscale("log")
-    ax.set_yscale("log")
-    ax.set_xlabel("Physical error rate")
-    ax.set_ylabel("Logical error rate")
-    ax.set_title(surface_plot_title(sweep_rows))
-    ax.grid(True, which="both", alpha=0.3)
-    ax.legend(fontsize=8, ncol=2)
-    if saw_zero:
-        ax.text(0.02, 0.02, "zero-count points shown at 0.5/shots", transform=ax.transAxes, fontsize=8)
-    fig.tight_layout()
-
-    output = output_dir / "surface_sweep_combined.png"
     fig.savefig(output, dpi=180)
     plt.close(fig)
     print(f"Wrote {output}")
@@ -282,14 +200,15 @@ def write_summary(rows, output_dir):
         for row in rows
         if row.get("_source", "").startswith("surface_sweep_")
         and row.get("code") == "surface_code"
+        and row.get("decoder") == "nv-qldpc-decoder"
         and row.get("logical_error_rate_with_decoding")
         and not row.get("syndromes_per_second")
     ]
     if surface_rows:
         if all(int(row["rounds"]) == int(row["distance"]) for row in surface_rows):
             surface_note = (
-                "This threshold-style sweep uses rounds=d, lower physical error rates, "
-                "and more shots than the quick fixed-round demo."
+                "This circuit-level memory sweep uses rounds=d, lower physical error rates, "
+                "and QLDPC decoding. It is the realistic integration demo."
             )
         else:
             surface_note = (
@@ -316,6 +235,34 @@ def write_summary(rows, output_dir):
                 f"| {row['shots']} "
                 f"| {rate(row['logical_error_rate_without_decoding'])} "
                 f"| {rate(row['logical_error_rate_with_decoding'])} |"
+            )
+        lines.append("")
+
+    capacity_rows = [
+        row
+        for row in rows
+        if row.get("experiment") == "surface_code_capacity"
+        and row.get("code") == "surface_code"
+        and row.get("decoded_logical_error_rate")
+    ]
+    if capacity_rows:
+        lines += [
+            "## Surface-Code Code-Capacity Sweep",
+            "",
+            "This cleaner accuracy sweep applies direct data errors instead of full circuit-level noise, "
+            "so it better isolates how code distance and decoder choice affect logical error rate.",
+            "",
+            "| decoder | distance | p | shots | raw rate | decoded rate |",
+            "| --- | ---: | ---: | ---: | ---: | ---: |",
+        ]
+        for row in sorted(capacity_rows, key=lambda row: (int(row["distance"]), float(row["physical_error_probability"]))):
+            lines.append(
+                f"| {row['decoder']} "
+                f"| {row['distance']} "
+                f"| {float(row['physical_error_probability']):.4f} "
+                f"| {row['shots']} "
+                f"| {rate(row['raw_logical_error_rate'])} "
+                f"| {rate(row['decoded_logical_error_rate'])} |"
             )
         lines.append("")
 
@@ -407,7 +354,6 @@ def main():
     outputs = [
         plot_steane(plt, rows, output_dir),
         plot_cpu_gpu_speedup(plt, rows, output_dir),
-        plot_surface_combined(plt, rows, output_dir),
         plot_decoder_time_accuracy(plt, rows, output_dir),
         write_summary(rows, output_dir),
     ]

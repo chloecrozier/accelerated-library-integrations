@@ -12,7 +12,7 @@ PROJECT = Path(__file__).resolve().parents[1]
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--decoder", default="single_error_lut")
+    parser.add_argument("--decoder", default="nv-qldpc-decoder")
     parser.add_argument("--distances", type=int, nargs="+", default=[3, 5, 7])
     parser.add_argument(
         "--p-values",
@@ -49,8 +49,8 @@ def print_table(rows):
 def surface_title(rows):
     rounds_match_distance = all(row["rounds"] == row["distance"] for row in rows)
     if rounds_match_distance:
-        return f"Surface-Code Logical Error Rate, rounds=d ({rows[0]['decoder']})"
-    return f"Surface-Code Logical Error Rate, custom rounds ({rows[0]['decoder']})"
+        return f"Circuit-Level Surface-Code Logical Error Rate, rounds=d ({rows[0]['decoder']})"
+    return f"Circuit-Level Surface-Code Logical Error Rate, custom rounds ({rows[0]['decoder']})"
 
 
 def plot_results(path, rows):

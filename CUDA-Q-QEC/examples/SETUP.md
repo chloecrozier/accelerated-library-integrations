@@ -26,9 +26,9 @@ This runs:
 
 - install verification
 - Steane code-capacity demo for the basic QEC loop
-- surface-code memory demo for the realistic QEC workflow
 - CPU vs GPU syndrome-throughput benchmark
-- LUT and QLDPC surface-code sweeps with `rounds=d`
+- QLDPC circuit-level surface-code memory sweep with `rounds=d`
+- QLDPC surface-code code-capacity sweep
 - LUT and BP decoder benchmark for distances 3, 5, 7, 9, and 11
 - result plotting and summary generation
 
@@ -46,24 +46,34 @@ If CuPy is unavailable and you only want the QEC demos, run:
 python examples/run_project.py --skip-cpu-gpu
 ```
 
+If the code-capacity sweep takes too long, run:
+
+```bash
+python examples/run_project.py --skip-code-capacity
+```
+
 ## 3. Surface Sweeps
 
-The standard run already includes both LUT and QLDPC surface sweeps. The default
-sweep uses distances 3, 5, and 7; `rounds=d`; lower physical error rates; and
-10,000 shots. This gives the graph a better chance of showing the expected
-low-error QEC trend.
+The standard run includes two QLDPC surface-code sweeps:
 
-To rerun the LUT sweep manually:
+- `surface_sweep.py`: circuit-level memory sweep for the realistic CUDA-Q QEC
+  integration demo.
+- `surface_code_capacity.py`: code-capacity sweep for the cleaner distance
+  scaling accuracy graph.
+
+The circuit-level sweep uses distances 3, 5, and 7; `rounds=d`; lower physical
+error rates; and 10,000 shots.
+
+To rerun the circuit-level surface sweep manually:
 
 ```bash
 python examples/surface_sweep.py
 ```
 
-To rerun the same sweep with the GPU-capable QLDPC decoder:
+To rerun the code-capacity surface sweep manually:
 
 ```bash
-python examples/surface_sweep.py \
-  --decoder nv-qldpc-decoder
+python examples/surface_code_capacity.py
 ```
 
 To include distances 9 and 11 in the standard workflow:
@@ -75,14 +85,14 @@ python examples/run_project.py --full-surface-sweep
 Use more shots when you need smoother low-error-rate curves:
 
 ```bash
-python examples/surface_sweep.py \
-  --decoder nv-qldpc-decoder \
-  --shots 100000
+python examples/surface_sweep.py --shots 100000
+python examples/surface_code_capacity.py --shots 200000
 ```
 
-The surface sweep is still not guaranteed to match published threshold plots.
-Decoder choice, noise model, shot count, and CUDA-Q QEC version can all change
-whether larger distance visibly lowers the logical error rate.
+The code-capacity sweep has a better chance of showing the expected distance
+trend because it applies data errors directly. The circuit-level sweep is more
+realistic but may still show larger distances getting worse if extra noisy
+circuit locations dominate.
 
 ## 4. Individual Commands
 
@@ -91,8 +101,9 @@ These are useful if you only want one artifact:
 ```bash
 python examples/install_verification.py
 python examples/hello_syndrome.py
-python examples/surface_memory.py
 python examples/cpu_gpu_benchmark.py
+python examples/surface_sweep.py
+python examples/surface_code_capacity.py
 python examples/decoder_benchmark.py
 python examples/plot_results.py
 ```
