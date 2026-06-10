@@ -45,6 +45,12 @@ def surface_sweep_rows(rows):
     ]
 
 
+def surface_plot_title(rows):
+    if all(int(row["rounds"]) == int(row["distance"]) for row in rows):
+        return "Surface-Code Logical Error Rate, rounds=d"
+    return "Surface-Code Logical Error Rate, fixed/custom rounds"
+
+
 def plot_steane(plt, rows, output_dir):
     grouped = {}
     for row in rows:
@@ -159,7 +165,7 @@ def plot_surface_combined(plt, rows, output_dir):
     ax.set_yscale("log")
     ax.set_xlabel("Physical error rate")
     ax.set_ylabel("Logical error rate")
-    ax.set_title("Surface-Code Logical Error Rate")
+    ax.set_title(surface_plot_title(sweep_rows))
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(fontsize=8, ncol=2)
     if saw_zero:
@@ -280,8 +286,23 @@ def write_summary(rows, output_dir):
         and not row.get("syndromes_per_second")
     ]
     if surface_rows:
+        if all(int(row["rounds"]) == int(row["distance"]) for row in surface_rows):
+            surface_note = (
+                "This threshold-style sweep uses rounds=d, lower physical error rates, "
+                "and more shots than the quick fixed-round demo."
+            )
+        else:
+            surface_note = (
+                "This sweep uses fixed/custom syndrome rounds, so it should not be read "
+                "as a clean surface-code threshold estimate."
+            )
         lines += [
-            "## Surface-Code Logical Error Results",
+            "## Surface-Code Sweep",
+            "",
+            surface_note,
+            "",
+            "It still may not match published threshold plots exactly because decoder choice, "
+            "noise model, and shot count all affect the trend.",
             "",
             "| decoder | distance | rounds | p | shots | without decoding | with decoding |",
             "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",

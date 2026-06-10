@@ -1,4 +1,4 @@
-"""Surface-code logical error-rate sweep for demo-scale QEC plots."""
+"""Surface-code logical error-rate sweep for threshold-style QEC plots."""
 
 import argparse
 import sys
@@ -13,15 +13,15 @@ PROJECT = Path(__file__).resolve().parents[1]
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--decoder", default="single_error_lut")
-    parser.add_argument("--distances", type=int, nargs="+", default=[3, 5, 7, 9, 11])
+    parser.add_argument("--distances", type=int, nargs="+", default=[3, 5, 7])
     parser.add_argument(
         "--p-values",
         type=float,
         nargs="+",
-        default=[0.001, 0.003, 0.005, 0.01, 0.03, 0.05, 0.1],
+        default=[0.0005, 0.001, 0.002, 0.003, 0.005, 0.007, 0.01],
     )
-    parser.add_argument("--rounds", type=int, default=3, help="fixed syndrome rounds for each distance")
-    parser.add_argument("--shots", type=int, default=1000)
+    parser.add_argument("--rounds", type=int, default=None, help="defaults to distance")
+    parser.add_argument("--shots", type=int, default=10000)
     parser.add_argument("--batch-size", type=int, default=10000)
     parser.add_argument("--max-iterations", type=int, default=50)
     parser.add_argument("--bp-method", type=int, default=0, help="QLDPC BP method")
@@ -44,6 +44,13 @@ def print_table(rows):
             f"{row['logical_errors_with_decoding']:>16} "
             f"{row['logical_error_rate_with_decoding']:>10.4g}"
         )
+
+
+def surface_title(rows):
+    rounds_match_distance = all(row["rounds"] == row["distance"] for row in rows)
+    if rounds_match_distance:
+        return f"Surface-Code Logical Error Rate, rounds=d ({rows[0]['decoder']})"
+    return f"Surface-Code Logical Error Rate, custom rounds ({rows[0]['decoder']})"
 
 
 def plot_results(path, rows):
@@ -79,7 +86,7 @@ def plot_results(path, rows):
     ax.set_yscale("log")
     ax.set_xlabel("Physical error rate")
     ax.set_ylabel("Logical error rate")
-    ax.set_title(f"Surface-Code Logical Error Rate ({rows[0]['decoder']})")
+    ax.set_title(surface_title(rows))
     ax.grid(True, which="both", alpha=0.3)
     ax.legend()
     if saw_zero:
@@ -105,7 +112,7 @@ def main():
         sys.exit("FAIL: --shots and --batch-size must be >= 1")
     if any(distance < 3 for distance in args.distances):
         sys.exit("FAIL: --distances must be >= 3")
-    if args.rounds < 1:
+    if args.rounds is not None and args.rounds < 1:
         sys.exit("FAIL: --rounds must be >= 1")
     if any(p < 0 or p > 1 for p in args.p_values):
         sys.exit("FAIL: --p-values must be probabilities in [0, 1]")
@@ -115,15 +122,16 @@ def main():
 
     rows = []
     for distance in args.distances:
+        rounds = args.rounds if args.rounds is not None else distance
         for p in args.p_values:
-            print(f"Running decoder={args.decoder}, d={distance}, rounds={args.rounds}, p={p}, shots={args.shots}")
+            print(f"Running decoder={args.decoder}, d={distance}, rounds={rounds}, p={p}, shots={args.shots}")
             rows.append(
                 run_memory_point(
                     np,
                     cudaq,
                     qec,
                     distance,
-                    args.rounds,
+                    rounds,
                     p,
                     args.shots,
                     args.decoder,

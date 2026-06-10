@@ -13,7 +13,7 @@ Suggested artifacts:
 - `surface_sweep_qldpc_brev_l4.csv`
 - `surface_sweep_qldpc_brev_l4.png`
 - `surface_sweep_combined.png`
-- `decoder_lut_bp_d7_brev_l4.csv`
+- `decoder_lut_bp_sweep_brev_l4.csv`
 - `steane_logical_error_rates.png`
 - `cpu_gpu_speedup.png`
 - `decoder_time_accuracy.png`
@@ -23,3 +23,7 @@ Suggested artifacts:
 
 Use Brev L4 numbers in the final slides so the CSVs, plots, and screenshots all
 come from the same platform.
+
+The default surface sweep uses distances 3, 5, and 7 with `rounds=d`, lower
+physical error rates, and 10,000 shots. If you run `--full-surface-sweep`, the
+same artifact names will include distances 9 and 11 as well.

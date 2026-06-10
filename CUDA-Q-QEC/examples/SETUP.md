@@ -28,8 +28,8 @@ This runs:
 - Steane code-capacity demo for the basic QEC loop
 - surface-code memory demo for the realistic QEC workflow
 - CPU vs GPU syndrome-throughput benchmark
-- LUT and QLDPC surface-code sweeps
-- LUT and BP decoder benchmark at distance 7
+- LUT and QLDPC surface-code sweeps with `rounds=d`
+- LUT and BP decoder benchmark for distances 3, 5, 7, 9, and 11
 - result plotting and summary generation
 
 The main outputs are written to `results/`.
@@ -48,8 +48,12 @@ python examples/run_project.py --skip-cpu-gpu
 
 ## 3. Surface Sweeps
 
-The standard run already includes both LUT and QLDPC surface sweeps. To rerun
-the LUT sweep manually:
+The standard run already includes both LUT and QLDPC surface sweeps. The default
+sweep uses distances 3, 5, and 7; `rounds=d`; lower physical error rates; and
+10,000 shots. This gives the graph a better chance of showing the expected
+low-error QEC trend.
+
+To rerun the LUT sweep manually:
 
 ```bash
 python examples/surface_sweep.py
@@ -62,6 +66,12 @@ python examples/surface_sweep.py \
   --decoder nv-qldpc-decoder
 ```
 
+To include distances 9 and 11 in the standard workflow:
+
+```bash
+python examples/run_project.py --full-surface-sweep
+```
+
 Use more shots when you need smoother low-error-rate curves:
 
 ```bash
@@ -70,8 +80,9 @@ python examples/surface_sweep.py \
   --shots 100000
 ```
 
-The sweep keeps the number of syndrome rounds fixed by default so distance
-comparisons are easier to interpret. It runs distances 3, 5, 7, 9, and 11 by default.
+The surface sweep is still not guaranteed to match published threshold plots.
+Decoder choice, noise model, shot count, and CUDA-Q QEC version can all change
+whether larger distance visibly lowers the logical error rate.
 
 ## 4. Individual Commands
 
@@ -86,6 +97,6 @@ python examples/decoder_benchmark.py
 python examples/plot_results.py
 ```
 
-The decoder benchmark defaults to one distance, `d=7`, with 2,000 shots. It
-compares `single_error_lut` and QLDPC `BP=0` for a cleaner presentation graph.
-Use `--distances 3 5 7 9 11` only if you want a full decoder sweep.
+The decoder benchmark defaults to 2,000 shots per distance. It compares
+`single_error_lut` and QLDPC `BP=0` over distances 3, 5, 7, 9, and 11.
+Use `--distance 7` only if you want one focused decoder comparison.

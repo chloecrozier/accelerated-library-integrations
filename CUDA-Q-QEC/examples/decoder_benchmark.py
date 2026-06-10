@@ -24,8 +24,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", default="brev_l4")
     parser.add_argument("--shots", type=int, default=2000)
-    parser.add_argument("--distance", type=int, default=7, help="default presentation workload")
-    parser.add_argument("--distances", type=int, nargs="+", default=None, help="optional distance sweep")
+    parser.add_argument("--distance", type=int, default=None, help="run one distance only")
+    parser.add_argument("--distances", type=int, nargs="+", default=[3, 5, 7, 9, 11])
     parser.add_argument("--rounds", type=int, default=None, help="defaults to distance")
     parser.add_argument("--p", type=float, default=0.001)
     parser.add_argument("--warmup", type=int, default=2)
@@ -176,9 +176,9 @@ def print_table(rows, gpu, args):
 
 def main():
     args = parse_args()
-    distances = args.distances if args.distances else [args.distance]
+    distances = [args.distance] if args.distance else args.distances
     if args.output is None:
-        name = "decoder_lut_bp_sweep" if args.distances else f"decoder_lut_bp_d{args.distance}"
+        name = f"decoder_lut_bp_d{args.distance}" if args.distance else "decoder_lut_bp_sweep"
         args.output = str(PROJECT / "results" / f"{name}_{args.platform}.csv")
 
     if args.shots < 1 or args.repeats < 1 or args.warmup < 0:

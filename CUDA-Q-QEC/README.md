@@ -59,12 +59,13 @@ Included examples:
   Steane code and reports raw vs decoded logical error rates.
 - `examples/surface_memory.py` runs one surface-code memory experiment with
   circuit-level noise.
-- `examples/surface_sweep.py` creates LUT and QLDPC surface-code logical
-  error-rate sweep CSVs with fixed syndrome rounds by default.
+- `examples/surface_sweep.py` creates LUT and QLDPC surface-code sweep CSVs.
+  It defaults to `rounds=d`, low physical error rates, 10,000 shots, and
+  distances 3, 5, and 7 to better approximate a threshold-style experiment.
 - `examples/cpu_gpu_benchmark.py` compares CPU NumPy and GPU CuPy throughput
   for the same batched QEC syndrome calculation.
-- `examples/decoder_benchmark.py` compares LUT and QLDPC BP=0 at `d=7` by
-  default, with an optional distance sweep.
+- `examples/decoder_benchmark.py` compares LUT and QLDPC BP=0 across distances
+  3, 5, 7, 9, and 11 by default.
 - `examples/plot_results.py` creates combined presentation plots and
   `results/SUMMARY.md` from CSV outputs.
 
@@ -88,6 +89,11 @@ This connects to AIPS:
   from Brev L4.
 - **Sell:** explain why NVIDIA GPUs matter before large-scale fault-tolerant
   QPUs are widely available.
+
+The surface-code sweep is closer to a research-style logical error-rate curve
+than the quick memory demo, but it still may not match published threshold plots
+exactly. Decoder choice, noise model, shot count, and the CUDA-Q QEC version all
+affect whether larger distance visibly lowers the measured logical error rate.
 
 ## Helpful Links
 
