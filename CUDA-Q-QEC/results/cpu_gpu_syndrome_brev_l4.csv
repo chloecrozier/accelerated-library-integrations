@@ -1,0 +1,3 @@
+benchmark,backend,platform,gpu_name,code,distance,rounds,physical_error_probability,shots,h_rows,h_cols,warmup,repeats,median_ms,min_ms,max_ms,syndromes_per_second,speedup_vs_cpu,scope
+cpu_gpu_syndrome,cpu_numpy,brev_l4,NVIDIA L4,surface_code,7,7,0.001,100000,168,791,1,5,324.47038600003,322.9712600004859,325.8463889997074,308194.5358181032,1.0,compute_only
+cpu_gpu_syndrome,gpu_cupy,brev_l4,NVIDIA L4,surface_code,7,7,0.001,100000,168,791,1,5,2.8668070008279756,2.857613000742276,2.9086220001772745,34882013.32392398,113.18180327671804,compute_only
